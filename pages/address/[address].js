@@ -49,10 +49,6 @@ const Address = (props) => {
         {
             Header: 'Cauldron',
             accessor: 'cauldron'
-        },
-        {
-            Header: 'Block',
-            accessor: 'block'
         }
     ], [])
     const tableInstance = useTable({ columns, data: liquidations })
@@ -116,13 +112,6 @@ const Address = (props) => {
                         })}
                     </tbody>
                 </table>
-
-                {/*{*/}
-                {/*    liquidations.map(liquidation => <div key={liquidation.id}>*/}
-                {/*        {liquidation.block} - {liquidation.transaction} - {liquidation.exchangeRate} - {liquidation.cauldron} - {liquidation.chain}*/}
-                {/*    </div>)*/}
-                {/*}*/}
-
             </main>
         </div>
     </>
@@ -137,16 +126,14 @@ export async function getLiquidationsFromGraph(address, graph, chain) {
     });
     const result = await client.query(`{
   userLiquidations(where: {user : "${address}"}) {
-    block
     transaction
     exchangeRate
     cauldron
   }
 } `).toPromise();
     return result.data.userLiquidations.map(liq => {
-        let { block, transaction, exchangeRate, cauldron } = liq;
+        let { transaction, exchangeRate, cauldron } = liq;
         return {
-            block,
             transaction,
             exchangeRate,
             cauldron,
