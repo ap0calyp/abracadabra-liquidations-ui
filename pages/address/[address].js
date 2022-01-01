@@ -43,8 +43,7 @@ const Address = (props) => {
             accessor: 'transaction',
             Cell: cellInfo => {
                 const explorer = explorers[Number(cellInfo.row.values.chain)];
-                return <a target="_blank" href={explorer + cellInfo.row.values.transaction}>{cellInfo.row.values.transaction}</a>
-
+                return <a target="_blank" rel="noreferrer" href={explorer + cellInfo.row.values.transaction}>{cellInfo.row.values.transaction}</a>
             }
         },
         {
