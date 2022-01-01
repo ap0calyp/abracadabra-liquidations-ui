@@ -78,11 +78,11 @@ const Address = (props) => {
                     {// Loop over the header rows
                         headerGroups.map(headerGroup => (
                             // Apply the header row props
-                            <tr {...headerGroup.getHeaderGroupProps()}>
+                            <tr key={headerGroup.getHeaderGroupProps().key} {...headerGroup.getHeaderGroupProps()}>
                                 {// Loop over the headers in each row
                                     headerGroup.headers.map(column => (
                                         // Apply the header cell props
-                                        <th {...column.getHeaderProps()}>
+                                        <th key={column.getHeaderProps().key} {...column.getHeaderProps()}>
                                             {// Render the header
                                                 column.render('Header')}
                                         </th>
@@ -96,14 +96,16 @@ const Address = (props) => {
                         rows.map(row => {
                             // Prepare the row for display
                             prepareRow(row)
+                            const { key, ...restRowProps} = row.getRowProps();
                             return (
                                 // Apply the row props
-                                <tr {...row.getRowProps()}>
+                                <tr key={key} {...restRowProps}>
                                     {// Loop over the rows cells
                                         row.cells.map(cell => {
                                             // Apply the cell props
+                                            const { key, ...restCellProps } = cell.getCellProps();
                                             return (
-                                                <td {...cell.getCellProps()}>
+                                                <td key={key} {...restCellProps}>
                                                     {// Render the cell contents
                                                         cell.render('Cell')}
                                                 </td>
