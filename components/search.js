@@ -5,8 +5,7 @@ export default function Search({ initialAddress, onSearch }) {
 
     return (
         <>
-            <br/>
-            <span>
+            <div className={"nowrap"}>
             <input
                 type="search"
                 placeholder="Search by Address"
@@ -17,8 +16,8 @@ export default function Search({ initialAddress, onSearch }) {
                     if (e.key === 'Enter') onSearch(newAddress)
                 }}
             />
-            <button onClick={() => onSearch(newAddress)}>Search</button>
-            </span>
+                <button onClick={() => onSearch(newAddress)}><span>Search </span></button>
+            </div>
         </>
     )
 }
