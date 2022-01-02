@@ -1,5 +1,4 @@
 import {useRouter} from 'next/router';
-import styles from '../../styles/Home.module.css';
 import Head from 'next/head';
 import Search from '../search';
 import { createClient } from 'urql';
@@ -83,7 +82,7 @@ const Address = (props) => {
 
     return (
 <>
-        <div className={styles.container}>
+        <div>
             <Head>
                 <title>abracadabra liquidations</title>
             </Head>
@@ -156,7 +155,7 @@ export async function getLiquidationsFromGraph(address, chainId) {
     }
     const result = await client.query(`{ userLiquidations(where: {user : "${address}"}) { ${fields} }}`).toPromise();
     return result.data.userLiquidations.map(liq => {
-        let { transaction, exchangeRate, cauldron, timestamp } = liq;
+        let { transaction, exchangeRate, cauldron, timestamp = 0 } = liq;
         return {
             transaction,
             exchangeRate,
