@@ -157,7 +157,7 @@ export async function getLiquidationsFromGraph(address, chainId) {
         .query(queryString)
         .toPromise();
     return result.data.userLiquidations.map(liq => {
-        let { transaction, exchangeRate, cauldron, timestamp = 0 } = liq;
+        let { transaction, exchangeRate, timestamp = 0 } = liq;
         return {
             transaction,
             exchangeRate,
