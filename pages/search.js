@@ -10,7 +10,7 @@ export default function Search({ initialAddress, onSearch }) {
             <input
                 type="search"
                 placeholder="Search by Address"
-                style={{minWidth: 350}}
+                style={{minWidth: 450}}
                 defaultValue={initialAddress}
                 onChange={(e) => setNewAddress(e.target.value)}
                 onKeyUp={(e) => {

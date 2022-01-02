@@ -7,20 +7,32 @@ import React from 'react';
 import {useTable} from 'react-table';
 
 
-const explorers = {
-    1: 'https://etherscan.io/tx/',
-    42161: 'https://arbiscan.io/tx/',
-    250: 'https://ftmscan.com/tx/',
-    43113: 'https://snowtrace.io/tx/',
-    56: 'https://bscscan.com/tx/'
-}
-
-const chains = {
-    1: 'Ethereum',
-    42161: 'Arbitrum',
-    250: 'Fantom',
-    43113: 'Avalanche',
-    56: 'Binance'
+const chainResources = {
+    1: {
+        name: 'Ethereum',
+        explorer: 'https://etherscan.io/tx/',
+        subgraph: 'ap0calyp/abracadabra-mainnet-fees'
+    },
+    42161: {
+        name: 'Arbitrum',
+        explorer: 'https://arbiscan.io/tx/',
+        subgraph: 'ap0calyp/abracadabra-arbitrum-fees'
+    },
+    250: {
+        name: 'Fantom',
+        explorer: 'https://ftmscan.com/tx/',
+        subgraph: 'ap0calyp/abracadabra-fantom-fees'
+    },
+    43113: {
+        name: 'Avalanche',
+        explorer: 'https://snowtrace.io/tx/',
+        subgraph: 'ap0calyp/abracadabra-avalanche-fees'
+    },
+    56: {
+        name: 'Binance Smart Chain',
+        explorer: 'https://bscscan.com/tx/',
+        subgraph: 'ap0calyp/abracadabra-binancesmartchain-fees'
+    }
 }
 
 const Address = (props) => {
@@ -33,23 +45,31 @@ const Address = (props) => {
     const columns = React.useMemo(() => [
         {
             Header: 'Chain',
-            accessor: 'chain',
+            accessor: 'chainId',
             Cell: cellInfo => {
-                return chains[Number(cellInfo.row.values.chain)]
+                return chainResources[cellInfo.row.values.chainId].name
+            }
+        },
+        {
+            Header: 'Timestamp',
+            accessor: 'timestamp',
+            Cell: cellInfo => {
+                return new Date(Number(cellInfo.row.values.timestamp) * 1000).toLocaleString()
             }
         },
         {
             Header: 'Transaction',
             accessor: 'transaction',
             Cell: cellInfo => {
-                const explorer = explorers[Number(cellInfo.row.values.chain)];
-                return <a target="_blank" rel="noreferrer" href={explorer + cellInfo.row.values.transaction}>{cellInfo.row.values.transaction}</a>
+                const explorer = chainResources[cellInfo.row.values.chainId].explorer;
+                return <a target="_blank" rel="noreferrer" href={explorer + cellInfo.row.values.transaction}>Block Explorer</a>
             }
         },
         {
             Header: 'Cauldron',
             accessor: 'cauldron'
         }
+
     ], [])
     const tableInstance = useTable({ columns, data: liquidations })
 
@@ -63,13 +83,17 @@ const Address = (props) => {
 
     return (
 <>
-        <Search onSearch={(address) => router.push(address ? `/address/${address}` : '/')} initialAddress={address}/>
         <div className={styles.container}>
             <Head>
                 <title>abracadabra liquidations</title>
             </Head>
             <main>
-                <table {...getTableProps()}>
+                <h1>abracadabra liquidations</h1>
+                <Search onSearch={(address) => router.push(address ? `/address/${address}` : '/')} initialAddress={address}/>
+                <br/>
+                <br/>
+                { liquidations.length === 0 && <div>No liquidations found</div>}
+                { liquidations.length > 0 && <table {...getTableProps()}>
                     <thead>
                     {// Loop over the header rows
                         headerGroups.map(headerGroup => (
@@ -112,6 +136,7 @@ const Address = (props) => {
                         })}
                     </tbody>
                 </table>
+                }
             </main>
         </div>
     </>
@@ -120,24 +145,24 @@ const Address = (props) => {
 
 export default Address
 
-export async function getLiquidationsFromGraph(address, graph, chain) {
+export async function getLiquidationsFromGraph(address, chainId) {
+    const { subgraph } = chainResources[chainId]
     const client = createClient({
-        url: `https://api.thegraph.com/subgraphs/name/ap0calyp/abracadabra-${graph}-fees`
+        url: `https://api.thegraph.com/subgraphs/name/${subgraph}`
     });
-    const result = await client.query(`{
-  userLiquidations(where: {user : "${address}"}) {
-    transaction
-    exchangeRate
-    cauldron
-  }
-} `).toPromise();
+    let fields = "transaction exchangeRate cauldron";
+    if (chainResources[chainId].name !== 'Binance Smart Chain') {
+        fields = fields + ' timestamp';
+    }
+    const result = await client.query(`{ userLiquidations(where: {user : "${address}"}) { ${fields} }}`).toPromise();
     return result.data.userLiquidations.map(liq => {
-        let { transaction, exchangeRate, cauldron } = liq;
+        let { transaction, exchangeRate, cauldron, timestamp } = liq;
         return {
             transaction,
             exchangeRate,
             cauldron,
-            chain
+            timestamp,
+            chainId
         }
     });
 }
@@ -145,11 +170,11 @@ export async function getLiquidationsFromGraph(address, graph, chain) {
 export async function getServerSideProps(context) {
     const { address } = context.query
     const liquidationArrays = await Promise.all([
-        getLiquidationsFromGraph(address, 'mainnet', '1'),
-        getLiquidationsFromGraph(address, 'arbitrum', '42161'),
-        getLiquidationsFromGraph(address, 'fantom', '250'),
-        getLiquidationsFromGraph(address, 'avalanche', '43113'),
-        getLiquidationsFromGraph(address, 'binancesmartchain', '56')
+        getLiquidationsFromGraph(address, 1),
+        getLiquidationsFromGraph(address, 42161),
+        getLiquidationsFromGraph(address, 250),
+        getLiquidationsFromGraph(address, 43113),
+        getLiquidationsFromGraph(address, 56)
     ]);
     const liquidations = liquidationArrays.reduce((prev, curr) => [...prev, ...curr], []);
 

@@ -12,17 +12,10 @@ const Home = (props) => {
       <Head>
         <title>abracadabra liquidations</title>
       </Head>
-
-        <main className={styles.main}>
-        <h1 className={styles.title}>
-          abracadabra liquidations
-        </h1>
-            <br/>
-
-        <Search onSearch={(address) => router.push(`/address/${address}`)} initialAddress=""/>
-
+      <main>
+        <h1>abracadabra liquidations</h1>
+        <Search onSearch={(address) => router.push(address ? `/address/${address}` : '/')} />
       </main>
-
     </div>
   )
 }
