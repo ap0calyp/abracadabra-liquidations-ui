@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import Search from './search'
+import Search from '../components/search'
 import {useRouter} from 'next/router';
 
 
@@ -13,7 +13,7 @@ const Home = (props) => {
       </Head>
       <main>
         <h1>abracadabra liquidations</h1>
-        <Search onSearch={(address) => router.push(address ? `/address/${address}` : '/')} />
+        <Search onSearch={(address) => router.push(address ? `/address/${address}` : '/', undefined, {shallow: !address})} />
       </main>
     </div>
   )

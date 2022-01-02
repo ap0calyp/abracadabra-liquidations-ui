@@ -1,6 +1,6 @@
 import {useRouter} from 'next/router';
 import Head from 'next/head';
-import Search from '../search';
+import Search from '../../components/search';
 import { createClient } from 'urql';
 import React from 'react';
 import {useTable} from 'react-table';
@@ -39,7 +39,7 @@ const Address = (props) => {
     const { address } = router.query
     const { liquidations } = props
     if (!address) {
-        router.push('/')
+        router.push('/', undefined,{shallow: true})
     }
     const columns = React.useMemo(() => [
         {
@@ -88,7 +88,7 @@ const Address = (props) => {
             </Head>
             <main>
                 <h1>abracadabra liquidations</h1>
-                <Search onSearch={(address) => router.push(address ? `/address/${address}` : '/')} initialAddress={address}/>
+                <Search onSearch={(address) => router.push(address ? `/address/${address}` : '/', undefined, {shallow: !address})} initialAddress={address}/>
                 <br/>
                 <br/>
                 { liquidations.length === 0 && <div>No liquidations found</div>}
@@ -146,11 +146,13 @@ export default Address
 
 export async function getLiquidationsFromGraph(address, chainId) {
     const { subgraph } = chainResources[chainId]
-    const client = createClient({
+    const clientOptions = {
         url: `https://api.thegraph.com/subgraphs/name/${subgraph}`
-    });
+    }
     const queryString = `{ userLiquidations(where: {user : "${address}"}) { transaction exchangeRate cauldron timestamp }}`;
-    const result = await client.query(queryString).toPromise();
+    const result = await createClient(clientOptions)
+        .query(queryString)
+        .toPromise();
     return result.data.userLiquidations.map(liq => {
         let { transaction, exchangeRate, cauldron, timestamp = 0 } = liq;
         return {
