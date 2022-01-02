@@ -149,11 +149,8 @@ export async function getLiquidationsFromGraph(address, chainId) {
     const client = createClient({
         url: `https://api.thegraph.com/subgraphs/name/${subgraph}`
     });
-    let fields = "transaction exchangeRate cauldron";
-    if (chainResources[chainId].name !== 'Binance Smart Chain') {
-        fields = fields + ' timestamp';
-    }
-    const result = await client.query(`{ userLiquidations(where: {user : "${address}"}) { ${fields} }}`).toPromise();
+    const queryString = `{ userLiquidations(where: {user : "${address}"}) { transaction exchangeRate cauldron timestamp }}`;
+    const result = await client.query(queryString).toPromise();
     return result.data.userLiquidations.map(liq => {
         let { transaction, exchangeRate, cauldron, timestamp = 0 } = liq;
         return {
