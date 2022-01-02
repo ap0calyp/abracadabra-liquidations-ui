@@ -65,8 +65,11 @@ const Address = (props) => {
             }
         },
         {
-            Header: 'Cauldron',
-            accessor: 'cauldron'
+            Header: 'Liquidated Price',
+            accessor: 'exchangeRate',
+            Cell: cellInfo => {
+                return 1/Number(cellInfo.row.values.exchangeRate)
+            }
         }
 
     ], [])
@@ -149,7 +152,7 @@ export async function getLiquidationsFromGraph(address, chainId) {
     const clientOptions = {
         url: `https://api.thegraph.com/subgraphs/name/${subgraph}`
     }
-    const queryString = `{ userLiquidations(where: {user : "${address}"}) { transaction exchangeRate cauldron timestamp }}`;
+    const queryString = `{ userLiquidations(where: {user : "${address}"}) { transaction exchangeRate timestamp }}`;
     const result = await createClient(clientOptions)
         .query(queryString)
         .toPromise();
@@ -158,7 +161,6 @@ export async function getLiquidationsFromGraph(address, chainId) {
         return {
             transaction,
             exchangeRate,
-            cauldron,
             timestamp,
             chainId
         }
