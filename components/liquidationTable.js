@@ -159,8 +159,9 @@ export async function getLiquidationsFromGraph(address, chainId, snackbar) {
     })
 }
 
-export async function getLiquidations(address, snackbar) {
+export async function getLiquidations(userAddress, snackbar) {
     NProgress.start()
+    const address = userAddress.toLowerCase()
     const liquidationArrays = await Promise.all([
         getLiquidationsFromGraph(address, 1, snackbar),
         getLiquidationsFromGraph(address, 42161, snackbar),
