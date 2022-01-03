@@ -20,7 +20,6 @@ const Address = () => {
                     <h1>abracadabra liquidations</h1>
                     <Search onSearch={(address) => router.push(address ? `/address/${address}` : '/')} initialAddress={address}/>
                     <br/>
-                    <br/>
                     <LiquidationTable address={address} />
                 </main>
             </div>
