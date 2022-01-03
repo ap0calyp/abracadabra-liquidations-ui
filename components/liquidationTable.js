@@ -3,6 +3,7 @@ import {useTable} from 'react-table'
 import {createClient} from 'urql'
 import NProgress from 'nprogress'
 import React from 'react'
+import {useSnackbar} from 'notistack';
 
 const chainResources = {
     1: {
@@ -32,8 +33,11 @@ const chainResources = {
     }
 }
 
-export default function LiquidationTable({ address }) {
-    const { data, error } = useSWR(address, getLiquidations, { revalidateOnFocus: false })
+export default function LiquidationTable(props) {
+    const { address } = props
+    // fml I should not have done this with the snackbar
+    const snackbar = useSnackbar()
+    const { data, error } = useSWR([address, snackbar], getLiquidations, { revalidateOnFocus: false })
     const liquidations = React.useMemo(() => data, [data])
 
     const columns = React.useMemo(() => [
@@ -130,7 +134,7 @@ export default function LiquidationTable({ address }) {
     )
 }
 
-export async function getLiquidationsFromGraph(address, chainId) {
+export async function getLiquidationsFromGraph(address, chainId, snackbar) {
     const { subgraph } = chainResources[chainId]
     const clientOptions = {
         url: `https://api.thegraph.com/subgraphs/name/${subgraph}`
@@ -140,6 +144,7 @@ export async function getLiquidationsFromGraph(address, chainId) {
         .query(queryString)
         .toPromise()
     if (result.error) {
+        snackbar.enqueueSnackbar(`Failed fetching data from [${subgraph}]`);
         console.error(result.error)
         return []
     }
@@ -154,14 +159,14 @@ export async function getLiquidationsFromGraph(address, chainId) {
     })
 }
 
-export async function getLiquidations(address) {
+export async function getLiquidations(address, snackbar) {
     NProgress.start()
     const liquidationArrays = await Promise.all([
-        getLiquidationsFromGraph(address, 1),
-        getLiquidationsFromGraph(address, 42161),
-        getLiquidationsFromGraph(address, 250),
-        getLiquidationsFromGraph(address, 43113),
-        getLiquidationsFromGraph(address, 56)
+        getLiquidationsFromGraph(address, 1, snackbar),
+        getLiquidationsFromGraph(address, 42161, snackbar),
+        getLiquidationsFromGraph(address, 250, snackbar),
+        getLiquidationsFromGraph(address, 43113, snackbar),
+        getLiquidationsFromGraph(address, 56, snackbar)
     ])
     NProgress.done()
     return liquidationArrays.reduce((prev, curr) => curr && [...prev, ...curr], [])

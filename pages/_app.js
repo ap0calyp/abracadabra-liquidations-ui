@@ -1,9 +1,12 @@
 import '../styles/globals.css'
+import {SnackbarProvider} from 'notistack';
 
 function MyApp({ Component, pageProps }) {
   return (
       <>
-        <Component {...pageProps} />
+          <SnackbarProvider maxSnack={3}>
+              <Component {...pageProps} />
+          </SnackbarProvider>
       </>
   )
 }

@@ -1,5 +1,4 @@
 import React from 'react'
-import NProgress from 'nprogress'
 import {useRouter} from 'next/router';
 import LiquidationTable from '../../components/liquidationTable';
 import Head from 'next/head';
