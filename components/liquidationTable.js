@@ -69,6 +69,10 @@ export default function LiquidationTable(props) {
             Cell: cellInfo => {
                 return 1/Number(cellInfo.row.values.exchangeRate)
             }
+        },
+        {
+            Header: 'MIM Loan Repaid',
+            accessor: 'loanRepaid'
         }
 
     ], [])
@@ -139,7 +143,7 @@ export async function getLiquidationsFromGraph(address, chainId, snackbar) {
     const clientOptions = {
         url: `https://api.thegraph.com/subgraphs/name/${subgraph}`
     }
-    const queryString = `{ userLiquidations(where: {user : "${address}"}) { transaction exchangeRate timestamp }}`
+    const queryString = `{ userLiquidations(where: {user : "${address}"}) { transaction exchangeRate timestamp loanRepaid }}`
     const result = await createClient(clientOptions)
         .query(queryString)
         .toPromise()
@@ -149,11 +153,12 @@ export async function getLiquidationsFromGraph(address, chainId, snackbar) {
         return []
     }
     return result.data.userLiquidations.map(liq => {
-        let { transaction, exchangeRate, timestamp = 0 } = liq
+        let { transaction, exchangeRate, timestamp, loanRepaid } = liq
         return {
             transaction,
             exchangeRate,
             timestamp,
+            loanRepaid,
             chainId
         }
     })
