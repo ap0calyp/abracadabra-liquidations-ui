@@ -48,13 +48,6 @@ table th::before {
     border-right: 5px solid transparent;
 }
 
-/*table th.sort-asc::before {*/
-/*    border-bottom: 5px solid #22543d;*/
-/*}*/
-/*table th.sort-desc::before {*/
-/*    border-top: 5px solid #22543d;*/
-/*}*/
-
 input {
     padding: 10px;
     margin-bottom: 20px;
@@ -194,7 +187,7 @@ button {
     display: none;
 }
 
-@media screen and (max-width: 40em) {
+@media screen and (max-width: 50em) {
     /*
       Force table elements to not behave like tables anymore
       Hide table headers (but not display: none;, for accessibility)

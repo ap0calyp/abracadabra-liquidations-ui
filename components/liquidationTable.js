@@ -55,7 +55,7 @@ export default function LiquidationTable(props) {
         },
         {
             header: 'MIM Loan Repaid',
-        }
+        },
         ];
 
 

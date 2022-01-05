@@ -12,6 +12,7 @@ const Home = () => {
             <main>
                 <h1>abracadabra liquidations</h1>
                 <Search onSearch={(address) => router.push(address ? `/address/${address}` : '/')} />
+                <div>made by ap0calyp for the community 🤍</div>
             </main>
         </div>
     )
