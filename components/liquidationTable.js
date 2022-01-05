@@ -1,9 +1,9 @@
 import useSWR from 'swr'
-import {useTable} from 'react-table'
 import {createClient} from 'urql'
 import NProgress from 'nprogress'
 import React from 'react'
 import {useSnackbar} from 'notistack';
+import {Table, Thead, Tbody, Tr, Th, Td} from 'react-super-responsive-table'
 
 const chainResources = {
     1: {
@@ -40,100 +40,49 @@ export default function LiquidationTable(props) {
     const { data, error } = useSWR([address, snackbar], getLiquidations, { revalidateOnFocus: false })
     const liquidations = React.useMemo(() => data, [data])
 
-    const columns = React.useMemo(() => [
+    const columns = [
         {
-            Header: 'Chain',
-            accessor: 'chainId',
-            Cell: cellInfo => {
-                return chainResources[cellInfo.row.values.chainId].name
-            }
+            header: 'Chain',
         },
         {
-            Header: 'Timestamp',
-            accessor: 'timestamp',
-            Cell: cellInfo => {
-                return new Date(Number(cellInfo.row.values.timestamp) * 1000).toLocaleString()
-            }
+            header: 'Timestamp',
         },
         {
-            Header: 'Transaction',
-            accessor: 'transaction',
-            Cell: cellInfo => {
-                const explorer = chainResources[cellInfo.row.values.chainId].explorer
-                return <a target="_blank" rel="noreferrer" href={explorer + cellInfo.row.values.transaction}>Block Explorer</a>
-            }
+            header: 'Transaction',
         },
         {
-            Header: 'Liquidated Price',
-            accessor: 'exchangeRate',
-            Cell: cellInfo => {
-                return 1/Number(cellInfo.row.values.exchangeRate)
-            }
+            header: 'Liquidated Price',
         },
         {
-            Header: 'MIM Loan Repaid',
-            accessor: 'loanRepaid'
+            header: 'MIM Loan Repaid',
         }
+        ];
 
-    ], [])
-    const tableInstance = useTable({ columns, data: liquidations || [] })
-
-    const {
-        getTableProps,
-        getTableBodyProps,
-        headerGroups,
-        rows,
-        prepareRow,
-    } = tableInstance
 
     return (
         <>
             { error && <div>Error: {error}</div>}
             { liquidations && liquidations.length === 0 && <div>No liquidations found</div>}
-            { liquidations && liquidations.length > 0 && <table {...getTableProps()}>
-                <thead>
-                {/* Loop over the header rows*/
-                    headerGroups.map(headerGroup => (
-                        /* Apply the header row props*/
-                        <tr key={headerGroup.getHeaderGroupProps().key} {...headerGroup.getHeaderGroupProps()}>
-                            {/* Loop over the headers in each row*/
-                                headerGroup.headers.map(column => (
-                                    /* Apply the header cell props*/
-                                    <th key={column.getHeaderProps().key} {...column.getHeaderProps()}>
-                                        {/* Render the header*/
-                                            column.render('Header')}
-                                    </th>
-                                ))}
-                        </tr>
-                    ))}
-                </thead>
-                {/* Apply the table body props */}
-                <tbody {...getTableBodyProps()}>
-                {/* Loop over the table rows*/
-                    rows.map(row => {
-                        /* Prepare the row for display*/
-                        prepareRow(row)
-                        const { key, ...restRowProps} = row.getRowProps()
-                        return (
-                            /* Apply the row props*/
-                            <tr key={key} {...restRowProps}>
-                                {/* Loop over the rows cells*/
-                                    row.cells.map(cell => {
-                                        /* Apply the cell props*/
-                                        const { key, ...restCellProps } = cell.getCellProps()
-                                        return (
-                                            <td key={key} {...restCellProps}>
-                                                {/* Render the cell contents*/
-                                                    cell.render('Cell')}
-                                            </td>
-                                        )
-                                    })}
-                            </tr>
-                        )
-                    })}
-                </tbody>
-            </table>
-            }
+            { liquidations && liquidations.length > 0 && <Table>
+                <Thead>
+                    <Tr>
+                        { columns.map(column => <Th key={column.header}>{column.header}</Th>) }
+                    </Tr>
+                </Thead>
+                <Tbody>
+                    { liquidations.map(liquidation => {
+                        const { transaction, chainId, timestamp, exchangeRate, loanRepaid } = liquidation
+                        return <Tr key={transaction}>
+                            <Td>{chainResources[chainId].name}</Td>
+                            <Td>{new Date(Number(timestamp) * 1000).toLocaleString()}</Td>
+                            <Td><a target="_blank" rel="noreferrer" href={chainResources[chainId].explorer + transaction}>Block Explorer</a></Td>
+                            <Td>{1/Number(exchangeRate)}</Td>
+                            <Td>{loanRepaid}</Td>
+                        </Tr>
+                    })
+                    }
+                </Tbody>
+            </Table>}
         </>
     )
 }
@@ -175,5 +124,7 @@ export async function getLiquidations(userAddress, snackbar) {
         getLiquidationsFromGraph(address, 56, snackbar)
     ])
     NProgress.done()
-    return liquidationArrays.reduce((prev, curr) => curr && [...prev, ...curr], [])
+    return liquidationArrays
+        .reduce((prev, curr) => curr && [...prev, ...curr], [])
+        .sort((a,b) => b.timestamp - a.timestamp)
 }
