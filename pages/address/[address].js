@@ -21,7 +21,11 @@ const Address = () => {
                     <Search onSearch={(address) => router.push(address ? `/address/${address}` : '/')} initialAddress={address}/>
                     <br/>
                     <LiquidationTable address={address} />
+                    <br/>
+                    <div className="center">made by ap0calyp for the community 🤍</div>
+                    <div className="center">Other community sites: <a href="https://wenmerl.in">wenmerl.in</a>, <a href="https://byebyedai.money">byebyedai.money</a> </div>
                 </main>
+
             </div>
         </>
     )
