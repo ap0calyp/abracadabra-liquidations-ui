@@ -1,12 +1,15 @@
 html,
 body {
-    max-width: 90%;
+    /*max-width: 90%;*/
     padding: 1rem;
     margin: 0;
     background-color: #221b47;
     color: #ddd;
     font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+h1 {
+    text-align: center;
 }
 table {
     border: 1px solid #ededed;
@@ -49,14 +52,17 @@ table th::before {
 }
 
 input {
-    padding: 10px;
-    margin-bottom: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
     font-size: 18px;
     border-radius: 5px 0 0 5px;
     border: 1px solid #ddd;
     box-shadow: none;
     background-color: transparent;
     color: #ddd;
+    min-width: 100px !important;
+    max-width: 85%;
+    width: 85%;
 }
 
 button {
@@ -65,15 +71,19 @@ button {
     color: white;
     border-radius: 0 5px 5px 0;
 
-    padding: 9px;
-    margin-bottom: 20px;
-    margin-right: 20px;
+    padding-top: 9px;
+    padding-bottom: 9px;
+    /*margin-bottom: 20px;*/
+    /*margin-right: 20px;*/
     font-size: 18px;
     box-shadow: none;
 }
 
 .nowrap {
     white-space: nowrap;
+    margin-right: 5%;
+    margin-left: 5%;
+    margin-bottom: 20px;
 }
 
 
