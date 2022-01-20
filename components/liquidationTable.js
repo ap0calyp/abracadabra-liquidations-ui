@@ -39,10 +39,26 @@ export default function LiquidationTable(props) {
     // fml I should not have done this with the snackbar
     const snackbar = useSnackbar()
     const { data, error } = useSWR([address, snackbar], getLiquidations, { revalidateOnFocus: false })
-    const liquidations = React.useMemo(() => data, [data])
-    const indirect = React.useMemo(() => { if(liquidations && liquidations.length > 0) return liquidations.findIndex(liquidation => liquidation.direct === false) > -1}, [liquidations])
+    const liquidations = React.useMemo(() =>data && data.length > 0 &&
+        data.map(({ transaction, chainId, timestamp, exchangeRate, loanRepaid, collateralRemoved, collateralSymbol, direct }) => {
+            return {
+                transaction,
+                chain: chainResources[chainId].name,
+                explorer: chainResources[chainId].explorer,
+                timestamp: new Date(Number(timestamp) * 1000).toLocaleString(),
+                exchangeRate: 1/Number(exchangeRate),
+                loanRepaid,
+                collateralRemoved,
+                collateralSymbol,
+                direct
+            };
+        }),
+        [data])
+    const indirect = React.useMemo(() => liquidations && liquidations.length > 0 &&
+            liquidations.findIndex(liquidation => liquidation.direct === false) > -1,
+        [liquidations])
 
-    let columns = [
+    let headerColumns = [
         {
             header: 'Chain',
         },
@@ -61,44 +77,32 @@ export default function LiquidationTable(props) {
         {
             header: 'Loan Repaid',
         }
-        ];
+    ].map(column => <Th key={column.header}>{column.header}</Th>);
 
 
-    return (
-        <>
-            { error && <div>Error: {error}</div>}
-            { liquidations && liquidations.length === 0 && <div>No liquidations found</div>}
-            { liquidations && liquidations.length > 0 && <>
-                <Table>
-                <Thead>
-                    <Tr>
-                        { columns.map(column => <Th key={column.header}>{column.header}</Th>) }
-                    </Tr>
-                </Thead>
+    return <>
+        { error && <div>Error: {error}</div>}
+        { liquidations && liquidations.length === 0 && <div className={"note"}>No liquidations found for {address}</div>}
+        { liquidations && liquidations.length > 0 && <>
+            <Table>
+                <Thead><Tr>{ headerColumns }</Tr></Thead>
                 <Tbody>
                     { liquidations.map(liquidation => {
-                        const { transaction, chainId, timestamp, exchangeRate, loanRepaid, collateralRemoved, collateralSymbol, direct } = liquidation
+                        const { transaction, chain, explorer, timestamp, exchangeRate, loanRepaid, collateralRemoved, collateralSymbol, direct } = liquidation
                         return <Tr key={transaction}>
-                            <Td>{chainResources[chainId].name}</Td>
-                            <Td>{new Date(Number(timestamp) * 1000).toLocaleString()}</Td>
-                            <Td><a target="_blank" rel="noreferrer" href={chainResources[chainId].explorer + transaction}>Block Explorer</a>{!direct && ' *'}</Td>
-                            <Td>{1/Number(exchangeRate)} USD</Td>
+                            <Td>{chain}</Td>
+                            <Td>{timestamp}</Td>
+                            <Td><a target="_blank" rel="noreferrer" href={explorer + transaction}>Block Explorer</a>{!direct && ' *'}</Td>
+                            <Td>{exchangeRate} USD</Td>
                             <Td>{collateralRemoved} {collateralSymbol}</Td>
                             <Td>{loanRepaid} MIM</Td>
                         </Tr>
-                    })
-                    }
+                    })}
                 </Tbody>
-              </Table>
-                {indirect === true &&
-                <div className={"note"}>
-                    * Possibly liquidation but not provable from available subgraph data.
-                </div>
-                }
-            </>
-                }
-        </>
-    )
+            </Table>
+            {indirect === true && <div className={"note"}>* Possibly liquidation but not provable from available subgraph data.</div>}
+        </>}
+    </>
 }
 
 export async function getLiquidationsFromGraph(address, chainId, snackbar) {
