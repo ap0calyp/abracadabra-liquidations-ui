@@ -1,6 +1,5 @@
-html,
 body {
-    padding: 1rem;
+    padding: 0 2% 0 2%;
     margin: 0;
     background-color: #221b47;
     color: #ddd;
@@ -9,6 +8,7 @@ body {
 }
 h1 {
     text-align: center;
+    padding: 0 !important;
 }
 table {
     border: 1px solid #ededed;
@@ -84,7 +84,6 @@ button {
     display: -webkit-flex;
     display: -ms-flexbox;
     display: flex;
-    width: 80%;
     margin: 1em auto;
     max-width: 510px;
 }
