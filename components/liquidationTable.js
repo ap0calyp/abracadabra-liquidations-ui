@@ -4,6 +4,7 @@ import NProgress from 'nprogress'
 import React from 'react'
 import {useSnackbar} from 'notistack';
 import {Table, Thead, Tbody, Tr, Th, Td} from 'react-super-responsive-table'
+// import tokenList from '@sushiswap/default-token-list/build/sushiswap-default.tokenlist.json'
 
 const chainResources = {
     1: {
@@ -39,8 +40,10 @@ export default function LiquidationTable(props) {
     const snackbar = useSnackbar()
     const { data, error } = useSWR([address, snackbar], getLiquidations, { revalidateOnFocus: false })
     const liquidations = React.useMemo(() => data, [data])
+    const indirect = React.useMemo(() => { if(liquidations && liquidations.length > 0) return liquidations.findIndex(liquidation => liquidation.direct === false) > -1}, [liquidations])
+    console.log({indirect})
 
-    const columns = [
+    let columns = [
         {
             header: 'Chain',
         },
@@ -54,8 +57,11 @@ export default function LiquidationTable(props) {
             header: 'Liquidated Price',
         },
         {
-            header: 'MIM Loan Repaid',
+            header: 'Collateral Removed'
         },
+        {
+            header: 'Loan Repaid',
+        }
         ];
 
 
@@ -63,7 +69,8 @@ export default function LiquidationTable(props) {
         <>
             { error && <div>Error: {error}</div>}
             { liquidations && liquidations.length === 0 && <div>No liquidations found</div>}
-            { liquidations && liquidations.length > 0 && <Table>
+            { liquidations && liquidations.length > 0 && <>
+                <Table>
                 <Thead>
                     <Tr>
                         { columns.map(column => <Th key={column.header}>{column.header}</Th>) }
@@ -71,18 +78,26 @@ export default function LiquidationTable(props) {
                 </Thead>
                 <Tbody>
                     { liquidations.map(liquidation => {
-                        const { transaction, chainId, timestamp, exchangeRate, loanRepaid } = liquidation
+                        const { transaction, chainId, timestamp, exchangeRate, loanRepaid, collateralRemoved, collateralSymbol, direct } = liquidation
                         return <Tr key={transaction}>
                             <Td>{chainResources[chainId].name}</Td>
                             <Td>{new Date(Number(timestamp) * 1000).toLocaleString()}</Td>
-                            <Td><a target="_blank" rel="noreferrer" href={chainResources[chainId].explorer + transaction}>Block Explorer</a></Td>
-                            <Td>{1/Number(exchangeRate)}</Td>
-                            <Td>{loanRepaid}</Td>
+                            <Td><a target="_blank" rel="noreferrer" href={chainResources[chainId].explorer + transaction}>Block Explorer</a>{!direct && ' *'}</Td>
+                            <Td>{1/Number(exchangeRate)} USD</Td>
+                            <Td>{collateralRemoved} {collateralSymbol}</Td>
+                            <Td>{loanRepaid} MIM</Td>
                         </Tr>
                     })
                     }
                 </Tbody>
-            </Table>}
+              </Table>
+                {indirect === true &&
+                <div className={"note"}>
+                    * Possibly liquidation but not provable from available subgraph data.
+                </div>
+                }
+            </>
+                }
         </>
     )
 }
@@ -92,7 +107,7 @@ export async function getLiquidationsFromGraph(address, chainId, snackbar) {
     const clientOptions = {
         url: `https://api.thegraph.com/subgraphs/name/${subgraph}`
     }
-    const queryString = `{ userLiquidations(where: {user : "${address}"}) { transaction exchangeRate timestamp loanRepaid }}`
+    const queryString = `{ userLiquidations(where: {user : "${address}", timestamp_gt: 0}) {transaction exchangeRate timestamp loanRepaid direct collateralRemoved cauldron { collateralSymbol } }}`
     const result = await createClient(clientOptions)
         .query(queryString)
         .toPromise()
@@ -102,12 +117,16 @@ export async function getLiquidationsFromGraph(address, chainId, snackbar) {
         return []
     }
     return result.data.userLiquidations.map(liq => {
-        let { transaction, exchangeRate, timestamp, loanRepaid } = liq
+        const { transaction, exchangeRate, timestamp, loanRepaid, direct, collateralRemoved, cauldron } = liq
+        const { collateralSymbol } = cauldron;
         return {
             transaction,
             exchangeRate,
             timestamp,
             loanRepaid,
+            direct,
+            collateralRemoved,
+            collateralSymbol,
             chainId
         }
     })

@@ -5,7 +5,7 @@ export default function Search({ initialAddress, onSearch }) {
 
     return (
         <>
-            <div className={"nowrap"}>
+            <div className={"search"}>
             <input
                 type="search"
                 placeholder="Search by Address"

@@ -1,6 +1,5 @@
 html,
 body {
-    /*max-width: 90%;*/
     padding: 1rem;
     margin: 0;
     background-color: #221b47;
@@ -61,8 +60,11 @@ input {
     background-color: transparent;
     color: #ddd;
     min-width: 100px !important;
-    max-width: 85%;
-    width: 85%;
+    -webkit-box-flex:1;
+    -webkit-flex:1;
+    -ms-flex:1;
+    flex:1;
+    text-indent: 10px;
 }
 
 button {
@@ -73,17 +75,24 @@ button {
 
     padding-top: 9px;
     padding-bottom: 9px;
-    /*margin-bottom: 20px;*/
-    /*margin-right: 20px;*/
     font-size: 18px;
     box-shadow: none;
 }
 
-.nowrap {
-    white-space: nowrap;
-    margin-right: 5%;
-    margin-left: 5%;
-    margin-bottom: 20px;
+.search {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    width: 80%;
+    margin: 1em auto;
+    max-width: 510px;
+}
+
+.note {
+    text-align: center;
+    font-style: italic;
+    margin-top: 1em;
 }
 
 .center {
@@ -201,7 +210,7 @@ button {
     display: none;
 }
 
-@media screen and (max-width: 50em) {
+@media screen and (max-width: 65em) {
     /*
       Force table elements to not behave like tables anymore
       Hide table headers (but not display: none;, for accessibility)
