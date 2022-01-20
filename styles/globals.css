@@ -13,7 +13,7 @@ h1 {
 table {
     border: 1px solid #ededed;
     border-spacing: 0;
-    border-radius: 3px;
+    border-radius: 5px;
     text-align: end;
 }
 table tr:last-child td {
@@ -23,8 +23,8 @@ table th,
 table td {
     margin: 0;
     padding: 0.5rem;
-    border-bottom: 1px solid #ededed;
-    border-right: 1px solid #ededed;
+    border-bottom: 1px solid #000;
+    border-right: 1px solid #000;
     position: relative;
 }
 table th:last-child,
@@ -232,8 +232,12 @@ button {
     }
 
     .responsiveTable tbody tr {
-        border: 1px solid #000;
+        border-bottom: 1px solid #000;
         padding: .25em;
+    }
+
+    .responsiveTable tbody tr:last-child {
+        border-bottom: 0;
     }
 
     .responsiveTable td.pivoted {
