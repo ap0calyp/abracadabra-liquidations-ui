@@ -41,7 +41,6 @@ export default function LiquidationTable(props) {
     const { data, error } = useSWR([address, snackbar], getLiquidations, { revalidateOnFocus: false })
     const liquidations = React.useMemo(() => data, [data])
     const indirect = React.useMemo(() => { if(liquidations && liquidations.length > 0) return liquidations.findIndex(liquidation => liquidation.direct === false) > -1}, [liquidations])
-    console.log({indirect})
 
     let columns = [
         {
