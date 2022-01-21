@@ -39,7 +39,6 @@ export default function LiquidationTable(props) {
     // fml I should not have done this with the snackbar
     const snackbar = useSnackbar()
     const { data, error } = useSWR([address, snackbar], getLiquidations, { revalidateOnFocus: false })
-    console.log({data, error})
     const liquidations = React.useMemo(() => !data && [] ||
         data.map(({ transaction, chainId, timestamp, exchangeRate, loanRepaid, collateralRemoved, collateralSymbol, direct }) => {
             return {
@@ -141,7 +140,7 @@ export async function getEnsWallet(userAddress) {
     const result = await createClient(clientOptions)
         .query(queryString)
         .toPromise()
-    if (result?.data?.domains?.length > 0) {
+    if (result?.data?.domains?.length > 0 && result.data.domains[0].resolvedAddress?.id) {
         return result.data.domains[0].resolvedAddress.id
     } else {
         return userAddress
@@ -164,7 +163,6 @@ export async function getLiquidations(userAddress, snackbar) {
         getLiquidationsFromGraph(address, 43113, snackbar),
         getLiquidationsFromGraph(address, 56, snackbar)
     ])
-    console.log({liquidationArrays})
     NProgress.done()
     return liquidationArrays
         .reduce((prev, curr) => curr && [...prev, ...curr], [])
