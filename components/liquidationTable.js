@@ -4,8 +4,6 @@ import NProgress from 'nprogress'
 import React from 'react'
 import {useSnackbar} from 'notistack';
 import {Table, Thead, Tbody, Tr, Th, Td} from 'react-super-responsive-table'
-import * as crypto from 'crypto';
-// import tokenList from '@sushiswap/default-token-list/build/sushiswap-default.tokenlist.json'
 
 const chainResources = {
     1: {
