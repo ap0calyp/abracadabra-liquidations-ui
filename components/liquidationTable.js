@@ -4,6 +4,7 @@ import NProgress from 'nprogress'
 import React from 'react'
 import {useSnackbar} from 'notistack';
 import {Table, Thead, Tbody, Tr, Th, Td} from 'react-super-responsive-table'
+import * as crypto from 'crypto';
 // import tokenList from '@sushiswap/default-token-list/build/sushiswap-default.tokenlist.json'
 
 const chainResources = {
@@ -34,12 +35,34 @@ const chainResources = {
     }
 }
 
+const headerColumns = [
+    {
+        header: 'Chain',
+    },
+    {
+        header: 'Timestamp',
+    },
+    {
+        header: 'Transaction',
+    },
+    {
+        header: 'Liquidated Price',
+    },
+    {
+        header: 'Collateral Removed'
+    },
+    {
+        header: 'Loan Repaid',
+    }
+].map(column => <Th key={column.header}>{column.header}</Th>);
+
+
 export default function LiquidationTable(props) {
     const { address } = props
     // fml I should not have done this with the snackbar
     const snackbar = useSnackbar()
     const { data, error } = useSWR([address, snackbar], getLiquidations, { revalidateOnFocus: false })
-    const liquidations = React.useMemo(() => !data && [] ||
+    const liquidations = React.useMemo(() => !data ||
         data.map(({ transaction, chainId, timestamp, exchangeRate, loanRepaid, collateralRemoved, collateralSymbol, direct }) => {
             return {
                 transaction,
@@ -58,26 +81,6 @@ export default function LiquidationTable(props) {
             liquidations.findIndex(liquidation => liquidation.direct === false) > -1,
         [liquidations])
 
-    let headerColumns = [
-        {
-            header: 'Chain',
-        },
-        {
-            header: 'Timestamp',
-        },
-        {
-            header: 'Transaction',
-        },
-        {
-            header: 'Liquidated Price',
-        },
-        {
-            header: 'Collateral Removed'
-        },
-        {
-            header: 'Loan Repaid',
-        }
-    ].map(column => <Th key={column.header}>{column.header}</Th>);
 
     return <>
         { error && <div>Error: {error}</div>}
@@ -109,9 +112,10 @@ export async function getLiquidationsFromGraph(address, chainId, snackbar) {
     const clientOptions = {
         url: `https://api.thegraph.com/subgraphs/name/${subgraph}`
     }
-    const queryString = `{ userLiquidations(where: {user : "${address}", timestamp_gt: 0}) {transaction exchangeRate timestamp loanRepaid direct collateralRemoved cauldron { collateralSymbol } }}`
+    const query = `query GetUserLiquidations($address: String!) { userLiquidations(where: {user : $address, timestamp_gt: 0}) {transaction exchangeRate timestamp loanRepaid direct collateralRemoved cauldron { collateralSymbol } }}`;
+
     const result = await createClient(clientOptions)
-        .query(queryString)
+        .query(query, { address })
         .toPromise()
     if (result.error) {
         snackbar.enqueueSnackbar(`Failed fetching data from [${subgraph}]`);
@@ -136,9 +140,9 @@ export async function getEnsWallet(userAddress) {
     const clientOptions = {
         url: `https://api.thegraph.com/subgraphs/name/ensdomains/ens`
     }
-    const queryString = `{ domains(where: {name:"${userAddress.toLowerCase()}"}) { resolvedAddress { id } }}`
+    const queryString = `query Domains($userAddress: String!) { domains(where: {name: $userAddress }) { resolvedAddress { id } }}`
     const result = await createClient(clientOptions)
-        .query(queryString)
+        .query(queryString, { userAddress: userAddress.toLowerCase() })
         .toPromise()
     if (result?.data?.domains?.length > 0 && result.data.domains[0].resolvedAddress?.id) {
         return result.data.domains[0].resolvedAddress.id
@@ -152,9 +156,13 @@ export async function getLiquidations(userAddress, snackbar) {
     NProgress.start()
     let address;
     if(userAddress.indexOf('.') > -1 ) {
-        address = await getEnsWallet(userAddress)
+        address = (await getEnsWallet(userAddress)).toLowerCase()
     } else {
         address = userAddress.toLowerCase()
+    }
+    if (!address.startsWith('0x') || address.length !== 42) {
+        NProgress.done()
+        return []
     }
     const liquidationArrays = await Promise.all([
         getLiquidationsFromGraph(address, 1, snackbar),
