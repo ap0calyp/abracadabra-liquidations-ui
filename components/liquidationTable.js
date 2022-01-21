@@ -79,10 +79,9 @@ export default function LiquidationTable(props) {
         }
     ].map(column => <Th key={column.header}>{column.header}</Th>);
 
-
     return <>
         { error && <div>Error: {error}</div>}
-        { liquidations && liquidations.length === 0 && <div className={"note"}>No liquidations found for {address}</div>}
+        { (!liquidations || liquidations.length === 0) && <div className={"note"}>No liquidations found for {address}</div>}
         { liquidations && liquidations.length > 0 && <>
             <Table>
                 <Thead><Tr>{ headerColumns }</Tr></Thead>
@@ -116,7 +115,6 @@ export async function getLiquidationsFromGraph(address, chainId, snackbar) {
         .toPromise()
     if (result.error) {
         snackbar.enqueueSnackbar(`Failed fetching data from [${subgraph}]`);
-        console.error(result.error)
         return []
     }
     return result.data.userLiquidations.map(liq => {
@@ -134,10 +132,30 @@ export async function getLiquidationsFromGraph(address, chainId, snackbar) {
         }
     })
 }
+export async function getEnsWallet(userAddress) {
+    const clientOptions = {
+        url: `https://api.thegraph.com/subgraphs/name/ensdomains/ens`
+    }
+    const queryString = `{ domains(where: {name:"${userAddress.toLowerCase()}"}) { resolvedAddress { id } }}`
+    const result = await createClient(clientOptions)
+        .query(queryString)
+        .toPromise()
+    if (result?.data?.domains?.length > 0) {
+        return result.data.domains[0].resolvedAddress.id
+    } else {
+        return userAddress
+    }
+}
+
 
 export async function getLiquidations(userAddress, snackbar) {
     NProgress.start()
-    const address = userAddress.toLowerCase()
+    let address;
+    if(userAddress.indexOf('.') > -1 ) {
+        address = await getEnsWallet(userAddress)
+    } else {
+        address = userAddress.toLowerCase()
+    }
     const liquidationArrays = await Promise.all([
         getLiquidationsFromGraph(address, 1, snackbar),
         getLiquidationsFromGraph(address, 42161, snackbar),

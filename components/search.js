@@ -8,7 +8,7 @@ export default function Search({ initialAddress, onSearch }) {
             <div className={"search"}>
             <input
                 type="search"
-                placeholder="Search by Address"
+                placeholder="Search by Address or ENS"
                 style={{minWidth: 450}}
                 defaultValue={initialAddress}
                 onChange={(e) => setNewAddress(e.target.value)}
