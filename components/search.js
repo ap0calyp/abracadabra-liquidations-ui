@@ -16,7 +16,7 @@ export default function Search({ initialAddress, onSearch }) {
                     if (e.key === 'Enter') onSearch(newAddress)
                 }}
             />
-                <button onClick={() => onSearch(newAddress)}><span>Search </span></button>
+                <button onClick={() => onSearch(newAddress)}><span>🔎</span></button>
             </div>
         </>
     )
