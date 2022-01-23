@@ -75,10 +75,6 @@ export default function LiquidationTable(props) {
             };
         }),
         [data])
-    const indirect = React.useMemo(() => liquidations && liquidations.length > 0 &&
-            liquidations.findIndex(liquidation => liquidation.direct === false) > -1,
-        [liquidations])
-
 
     return <>
         { error && <div>Error: {error}</div>}
@@ -100,7 +96,6 @@ export default function LiquidationTable(props) {
                     })}
                 </Tbody>
             </Table>
-            {indirect === true && <div className={"note"}>* Possibly liquidation but not provable from available subgraph data.</div>}
         </>}
     </>
 }
