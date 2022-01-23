@@ -61,7 +61,7 @@ export default function LiquidationTable(props) {
     const snackbar = useSnackbar()
     const { data, error } = useSWR([address, snackbar], getLiquidations, { revalidateOnFocus: false })
     const liquidations = React.useMemo(() => !data ||
-        data.map(({ transaction, chainId, timestamp, exchangeRate, loanRepaid, collateralRemoved, collateralSymbol, direct }) => {
+        data.map(({ transaction, chainId, timestamp, exchangeRate, loanRepaid, collateralRemoved, collateralSymbol }) => {
             return {
                 transaction,
                 chain: chainResources[chainId].name,
@@ -70,15 +70,10 @@ export default function LiquidationTable(props) {
                 exchangeRate: 1/Number(exchangeRate),
                 loanRepaid,
                 collateralRemoved,
-                collateralSymbol,
-                direct
+                collateralSymbol
             };
         }),
         [data])
-    const indirect = React.useMemo(() => liquidations && liquidations.length > 0 &&
-            liquidations.findIndex(liquidation => liquidation.direct === false) > -1,
-        [liquidations])
-
 
     return <>
         { error && <div>Error: {error}</div>}
@@ -88,11 +83,11 @@ export default function LiquidationTable(props) {
                 <Thead><Tr>{ headerColumns }</Tr></Thead>
                 <Tbody>
                     { liquidations.map(liquidation => {
-                        const { transaction, chain, explorer, timestamp, exchangeRate, loanRepaid, collateralRemoved, collateralSymbol, direct } = liquidation
+                        const { transaction, chain, explorer, timestamp, exchangeRate, loanRepaid, collateralRemoved, collateralSymbol } = liquidation
                         return <Tr key={transaction}>
                             <Td>{chain}</Td>
                             <Td>{timestamp}</Td>
-                            <Td><a target="_blank" rel="noreferrer" href={explorer + transaction}>Block Explorer</a>{!direct && ' *'}</Td>
+                            <Td><a target="_blank" rel="noreferrer" href={explorer + transaction}>Block Explorer</a></Td>
                             <Td>{exchangeRate} USD</Td>
                             <Td>{collateralRemoved} {collateralSymbol}</Td>
                             <Td>{loanRepaid} MIM</Td>
@@ -100,7 +95,6 @@ export default function LiquidationTable(props) {
                     })}
                 </Tbody>
             </Table>
-            {indirect === true && <div className={"note"}>* Possibly liquidation but not provable from available subgraph data.</div>}
         </>}
     </>
 }
@@ -110,7 +104,7 @@ export async function getLiquidationsFromGraph(address, chainId, snackbar) {
     const clientOptions = {
         url: `https://api.thegraph.com/subgraphs/name/${subgraph}`
     }
-    const query = `query GetUserLiquidations($address: String!) { userLiquidations(where: {user : $address, timestamp_gt: 0}) {transaction exchangeRate timestamp loanRepaid direct collateralRemoved cauldron { collateralSymbol } }}`;
+    const query = `query GetUserLiquidations($address: String!) { userLiquidations(where: {user : $address, timestamp_gt: 0}) {transaction exchangeRate timestamp loanRepaid collateralRemoved cauldron { collateralSymbol } }}`;
 
     const result = await createClient(clientOptions)
         .query(query, { address })
@@ -120,14 +114,13 @@ export async function getLiquidationsFromGraph(address, chainId, snackbar) {
         return []
     }
     return result.data.userLiquidations.map(liq => {
-        const { transaction, exchangeRate, timestamp, loanRepaid, direct, collateralRemoved, cauldron } = liq
+        const { transaction, exchangeRate, timestamp, loanRepaid, collateralRemoved, cauldron } = liq
         const { collateralSymbol } = cauldron;
         return {
             transaction,
             exchangeRate,
             timestamp,
             loanRepaid,
-            direct,
             collateralRemoved,
             collateralSymbol,
             chainId
