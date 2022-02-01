@@ -1,19 +1,16 @@
-import {useState} from 'react';
+import {StringParam, useQueryParam} from 'use-query-params';
 
 export default function Calculator() {
-    const [collateralPrice, setCollateralPrice] = useState()
-    const [collateralDeposited, setCollateralDeposited] = useState()
-    const [mimBorrowed, setMimBorrowed] = useState()
-    let [mcr, setMcr] = useState()
+    const [collateralPrice, setCollateralPrice] = useQueryParam('collateral-price', StringParam)
+    const [collateralDeposited, setCollateralDeposited] = useQueryParam('collateral-deposited', StringParam)
+    const [mimBorrowed, setMimBorrowed] = useQueryParam('mim-borrowed', StringParam)
+    const [mcr, setMcr] = useQueryParam('mcr', StringParam)
     const collateralValue = collateralPrice * collateralDeposited;
     const ltv = mimBorrowed / collateralValue;
-    const ltvPercent = ltv && Math.round(ltv * 10000) / 100 + '%' || '';
-    if (mcr && mcr.endsWith('%')) {
-        mcr = mcr.slice(0, -1);
-    }
-    mcr = Number(mcr);
+    const ltvPercent = Number.isFinite(ltv) && Math.round(ltv * 10000) / 100 + '%' || '';
     const solvent = mcr ? (ltv * 100) < mcr : true
     const liquidationPrice = solvent ? mimBorrowed / (collateralDeposited * mcr) * 100 : '';
+    const positionHealth = mcr - (ltv * 100)
     return (
         <div className={'center'}>
             <button className={"calculator-button"} disabled>Calculator 🧮</button>
@@ -21,15 +18,17 @@ export default function Calculator() {
             <br/>
             <div className={'calculator-box'}>
                 <label>Collateral Deposited</label>
-                <input className={'calculator-input'} onInput={(formEvent) => setCollateralDeposited(formEvent.target.value)} type={"number"} placeholder={'Number of Tokens'}/>
+                <input className={'calculator-input'} value={collateralDeposited} onInput={(formEvent) => setCollateralDeposited(formEvent.target.value)} type={"number"} placeholder={'Number of Tokens'}/>
                 <label>Collateral Price</label>
-                <input className={'calculator-input'} onInput={(formEvent) => setCollateralPrice(formEvent.target.value)} type={"number"} placeholder={'One Token in $'}/>
+                <input className={'calculator-input'} value={collateralPrice} onInput={(formEvent) => setCollateralPrice(formEvent.target.value)} type={"number"} placeholder={'One Token in $'}/>
                 <label>MIM Borrowed</label>
-                <input className={'calculator-input'} onInput={(formEvent) => setMimBorrowed(formEvent.target.value)} type={"number"}/>
+                <input className={'calculator-input'} value={mimBorrowed} onInput={(formEvent) => setMimBorrowed(formEvent.target.value)} type={"number"}/>
                 <label>MCR [Cauldron Parameter]</label>
-                <input className={'calculator-input'} onInput={(formEvent) => setMcr(formEvent.target.value)} type={"number"}/>
+                <input className={'calculator-input'} value={mcr} onInput={(formEvent) => setMcr(formEvent.target.value)} type={"number"}/>
                 <label>LTV (Loan To Value)</label>
                 <input className={'calculator-input'} disabled value={ltvPercent || ''} placeholder={'Loan To Value'} style={solvent ? { color: '#ddd'} : { color: '#f00' } }/>
+                <label>Position Health</label>
+                <input className={'calculator-input'} disabled value={Number.isFinite(positionHealth) ? positionHealth + '%' : ''} style={solvent ? { color: '#ddd'} : { color: '#f00' } }/>
                 <label>Liquidation Price</label>
                 <input className={'calculator-input'} disabled value={liquidationPrice || ''} type={"number"}/>
             </div>
@@ -48,6 +47,9 @@ export default function Calculator() {
                 </h5>
                 <h5>
                     Liquidation Fee = MIM Borrowed * Liquidation Fee Percentage
+                </h5>
+                <h5>
+                    Position Health = MCR - LTV
                 </h5>
                 <br/>
             </div>
