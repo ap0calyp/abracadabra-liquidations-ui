@@ -44,7 +44,7 @@ export default function Calculator() {
                     LTV = MIM Borrowed / Collateral Value
                 </h5>
                 <h5>
-                    Liquidation Price = MIM Borrowed / Collateral Deposited * MCR
+                    Liquidation Price = MIM Borrowed / (Collateral Deposited * MCR)
                 </h5>
                 <h5>
                     Liquidation Fee = MIM Borrowed * Liquidation Fee Percentage
