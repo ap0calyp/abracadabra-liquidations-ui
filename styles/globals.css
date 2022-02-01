@@ -102,6 +102,16 @@ input {
     border-radius: 5px;
 }
 
+.calculator-box input::-webkit-outer-spin-button,
+.calculator-box input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.calculator-box input[type=number] {
+    -moz-appearance: textfield;
+}
+
 .search-button {
     border-radius: 0 5px 5px 0;
     padding-top: 9px;
