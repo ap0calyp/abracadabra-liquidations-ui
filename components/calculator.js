@@ -16,7 +16,7 @@ export default function Calculator() {
     const liquidationPrice = solvent ? mimBorrowed / (collateralDeposited * mcr) * 100 : '';
     return (
         <div className={'center'}>
-            <button disabled>Calculator 🧮</button>
+            <button className={"calculator-button"} disabled>Calculator 🧮</button>
             <br/>
             <br/>
             <div className={'calculator-box'}>

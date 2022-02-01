@@ -98,6 +98,10 @@ input {
     margin-bottom: 2px;
 }
 
+.calculator-button {
+    border-radius: 5px;
+}
+
 .search-button {
     border-radius: 0 5px 5px 0;
     padding-top: 9px;
