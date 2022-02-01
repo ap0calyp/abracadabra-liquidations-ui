@@ -8,6 +8,7 @@ export default function Search({ initialAddress, onSearch }) {
             <div className={"search"}>
             <input
                 type="search"
+                className={"search-input"}
                 placeholder="Search by Address or ENS"
                 style={{minWidth: 450}}
                 defaultValue={initialAddress}
@@ -16,7 +17,7 @@ export default function Search({ initialAddress, onSearch }) {
                     if (e.key === 'Enter') onSearch(newAddress)
                 }}
             />
-                <button onClick={() => onSearch(newAddress)}><span>🔎</span></button>
+                <button className={"search-button"} onClick={() => onSearch(newAddress)}><span>🔎</span></button>
             </div>
         </>
     )

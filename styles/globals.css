@@ -54,6 +54,23 @@ input {
     padding-top: 10px;
     padding-bottom: 10px;
     font-size: 18px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    box-shadow: none;
+    background-color: transparent;
+    color: #ddd;
+    min-width: 100px !important;
+    -webkit-box-flex:1;
+    -webkit-flex:1;
+    -ms-flex:1;
+    flex:1;
+    text-indent: 10px;
+}
+
+.search-input {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-size: 18px;
     border-radius: 5px 0 0 5px;
     border: 1px solid #ddd;
     box-shadow: none;
@@ -67,13 +84,31 @@ input {
     text-indent: 10px;
 }
 
-button {
-    background-color: #3498db;
-    border-color: #3498db;
-    border-radius: 0 5px 5px 0;
+.calculator-box {
+    display: flex;
+    flex: fit-content;
+    flex-direction: column;
+    align-items: center;
+}
 
+.calculator-box input {
+    margin-bottom: 15px;
+}
+.calculator-box label {
+    margin-bottom: 2px;
+}
+
+.search-button {
+    border-radius: 0 5px 5px 0;
     padding-top: 9px;
     padding-bottom: 9px;
+}
+
+button {
+    background-color: #0367aa;
+    border-color: #3498db;
+    color: #ddd;
+
     font-size: 18px;
     box-shadow: none;
 }
