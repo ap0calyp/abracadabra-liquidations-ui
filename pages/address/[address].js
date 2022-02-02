@@ -3,7 +3,7 @@ import {useRouter} from 'next/router';
 import LiquidationTable from '../../components/liquidationTable';
 import Search from '../../components/search';
 
-const Address = () => {
+export default function Address() {
     const router = useRouter()
     if (!router.isReady) {
         return <div>Loading...</div>
@@ -16,5 +16,3 @@ const Address = () => {
         </main>
     )
 }
-
-export default Address
