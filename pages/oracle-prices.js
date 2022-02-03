@@ -71,7 +71,6 @@ function OraclePrices() {
         }
         return data;
     }, [data, error])
-    console.log(oracleValues);
     return (
         <main>
             <Search onSearch={(address) => router.push(address ? `/address/${address}` : '/')} />
