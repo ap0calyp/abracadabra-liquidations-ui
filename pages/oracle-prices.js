@@ -100,6 +100,7 @@ function OraclePrices() {
                     }
                 </Tbody>
             </Table>
+            <div className={"center"}>* Deprecated cauldron</div>
 
         </main>
     )

@@ -12,6 +12,11 @@ export default function Address() {
     return (
         <main>
             <Search onSearch={(address) => router.push(address ? `/address/${address}` : '/')} initialAddress={address}/>
+            <div className={'center'}>
+                <button className={"calculator-button"} disabled>Calculator 🧮</button>
+                <button className={"calculator-button"} onClick={() => router.push('/oracle-prices')}>Oracle Prices 🔮</button>
+            </div>
+            <br/>
             <LiquidationTable address={address} />
         </main>
     )
