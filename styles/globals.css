@@ -100,6 +100,8 @@ input {
 
 .calculator-button {
     border-radius: 5px;
+    margin-right: 5px;
+    margin-left: 5px;
 }
 
 .calculator-box input::-webkit-outer-spin-button,
