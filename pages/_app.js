@@ -6,15 +6,15 @@ import QueryProvider from '../components/queryProvider';
 
 export default function MyApp({ Component, pageProps }) {
     const router = useRouter();
-  return (
-      <>
-          <QueryProvider>
-          <SnackbarProvider maxSnack={3}>
-              <Layout>
-                  <Component {...pageProps} />
-              </Layout>
-          </SnackbarProvider>
-          </QueryProvider>
-      </>
-  )
+    return (
+        <>
+            <QueryProvider>
+                <SnackbarProvider maxSnack={3}>
+                    <Layout>
+                        <Component {...pageProps} />
+                    </Layout>
+                </SnackbarProvider>
+            </QueryProvider>
+        </>
+    )
 }

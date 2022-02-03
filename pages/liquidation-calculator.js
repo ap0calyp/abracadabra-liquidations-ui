@@ -8,6 +8,10 @@ export default function LiquidationCalculator() {
     return (
         <main>
             <Search onSearch={(address) => router.push(address ? `/address/${address}` : '/')} />
+            <div className={'center'}>
+                <button className={"calculator-button"} disabled>Calculator 🧮</button>
+                <button className={"calculator-button"} onClick={() => router.push('/oracle-prices')}>Oracle Prices 🔮</button>
+            </div>
             <Calculator/>
         </main>
     )

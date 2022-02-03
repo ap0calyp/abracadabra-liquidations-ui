@@ -13,7 +13,6 @@ export default function Calculator() {
     const positionHealth = mcr - (ltv * 100)
     return (
         <div className={'center'}>
-            <button className={"calculator-button"} disabled>Calculator 🧮</button>
             <br/>
             <br/>
             <div className={'calculator-box'}>
