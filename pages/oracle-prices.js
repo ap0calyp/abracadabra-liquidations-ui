@@ -1,9 +1,10 @@
 import Search from '../components/search'
 import {useRouter} from 'next/router';
-import {promisify} from 'util';
 import cauldronAbi from '../abis/cauldron.json';
 import oracleAbi from '../abis/oracle.json'
 import {Table, Tr, Td, Th, Thead, Tbody} from 'react-super-responsive-table';
+import useSWR from 'swr';
+import React from 'react';
 
 const Web3 = require('web3')
 const cauldrons = {
@@ -61,8 +62,16 @@ const cauldrons = {
     ]
 }
 
-function OraclePrices({ blockNumber, oracleValues }) {
+function OraclePrices() {
     const router = useRouter()
+    const { data, error } = useSWR([Web3, cauldrons], getOraclePrices, { revalidateOnFocus: false })
+    const oracleValues = React.useMemo(() => {
+        if (!data || error) {
+            return []
+        }
+        return data;
+    }, [data, error])
+    console.log(oracleValues);
     return (
         <main>
             <Search onSearch={(address) => router.push(address ? `/address/${address}` : '/')} />
@@ -70,8 +79,6 @@ function OraclePrices({ blockNumber, oracleValues }) {
                 <button className={"calculator-button"} onClick={() => router.push('/liquidation-calculator')}>Calculator 🧮</button>
                 <button className={"calculator-button"} disabled>Oracle Prices 🔮</button>
             </div>
-            {/*<div>mainnet blocknumber: { blockNumber }</div>*/}
-            {/*<br/>*/}
             <h3 className={"center"}>Oracle Prices</h3>
             <Table>
                 <Thead>
@@ -83,7 +90,7 @@ function OraclePrices({ blockNumber, oracleValues }) {
                 </Thead>
                 <Tbody>
                     {
-                        oracleValues.map(oracleValue =>
+                        oracleValues && oracleValues.length > 0 && oracleValues.map(oracleValue =>
                             <Tr key={oracleValue.address}>
                                 <Td>{oracleValue.network}</Td>
                                 <Td>{oracleValue.token}{oracleValue.deprecated && ' *'}</Td>
@@ -106,7 +113,7 @@ async function extracted(web3, cauldronAddress, decimals) {
     return 1 / (await oracleContract.methods.get(oracleData).call())['1'] * Math.pow(10, decimals)
 }
 
-export async function getServerSideProps() {
+export async function getOraclePrices(Web3, cauldrons) {
     const mainnet = new Web3('wss://mainnet.infura.io/ws/v3/f6d830edcc1c44b38b066d4b1095194a')
     const fantom = new Web3('wss://wsapi.fantom.network')
     const avalanche = new Web3('https://api.avax.network/ext/bc/C/rpc')
@@ -122,9 +129,7 @@ export async function getServerSideProps() {
     ]
 
     const oracleValues = await Promise.all(promises)
-    const getBlockNumber = promisify(mainnet.eth.getBlockNumber)
-    const blockNumber = await getBlockNumber()
-    return { props: {blockNumber, oracleValues: [...oracleValues] } };
+    return [...oracleValues];
 }
 
 export default OraclePrices
