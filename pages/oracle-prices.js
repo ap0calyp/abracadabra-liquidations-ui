@@ -1,15 +1,39 @@
 import Search from '../components/search'
-import {useRouter} from 'next/router';
-import cauldronAbi from '../abis/cauldron.json';
+import {useRouter} from 'next/router'
+import cauldronAbi from '../abis/cauldron.json'
 import oracleAbi from '../abis/oracle.json'
-import {Table, Tr, Td, Th, Thead, Tbody} from 'react-super-responsive-table';
-import useSWR from 'swr';
-import React from 'react';
-import NProgress from 'nprogress';
-import {StringParam, useQueryParam} from 'use-query-params';
+import {Table, Tr, Td, Th, Thead, Tbody} from 'react-super-responsive-table'
+import useSWR from 'swr'
+import React from 'react'
+import NProgress from 'nprogress'
+import {StringParam, useQueryParam} from 'use-query-params'
 
 const Web3 = require('web3')
-const cauldrons = {
+
+const NETWORKS = {
+    mainnet: {
+        name: 'Ethereum',
+        web3: new Web3('wss://mainnet.infura.io/ws/v3/f6d830edcc1c44b38b066d4b1095194a')
+    },
+    ftm: {
+        name: 'Fantom',
+        web3: new Web3('wss://wsapi.fantom.network')
+    },
+    avax: {
+        name: 'Avalanche',
+        web3: new Web3('https://api.avax.network/ext/bc/C/rpc')
+    },
+    arbitrum: {
+        name: 'Arbitrum',
+        web3: new Web3('https://arb1.arbitrum.io/rpc')
+    },
+    bsc: {
+        name: 'Binance Smart Chain',
+        web3: new Web3('https://bsc-dataseed.binance.org')
+    }
+}
+
+const CAULDRONS = {
     mainnet: [
         { token: 'WETH', address: '0x390Db10e65b5ab920C19149C919D970ad9d18A41', decimals: 18 },
         { token: 'WBTC', address: '0x5ec47EE69BEde0b6C2A2fC0D9d094dF16C192498', decimals: 8 },
@@ -64,25 +88,23 @@ const cauldrons = {
     ]
 }
 
-function OraclePrices() {
+export default function OraclePrices() {
     const [filter, setFilter] = useQueryParam('filter', StringParam)
+    const lowerFilter = filter && filter.toLowerCase() || '';
     const router = useRouter()
-    const { data, error, mutate } = useSWR([Web3, cauldrons], getOraclePrices, { revalidateOnFocus: false })
+    const { data, error, mutate } = useSWR({}, getOraclePrices, { revalidateOnFocus: false })
     const oracleValues = React.useMemo(() => {
         if (!data || error) {
             return []
         }
-        return data;
+        return data
     }, [data, error])
     const cauldronsToShow = oracleValues && oracleValues.length > 0 &&
         oracleValues
-            .filter(oracleValue => {
-                if (filter) {
-                    const lowerFilter = filter.toLowerCase()
-                    return oracleValue.network.toLowerCase().indexOf(lowerFilter) > -1 ||
-                        oracleValue.token.toLowerCase().indexOf(lowerFilter) > -1;
-                } else return true;
-            }) || [];
+            .filter(oracleValue => !lowerFilter && true
+                || (oracleValue.network.toLowerCase().indexOf(lowerFilter) > -1
+                    || oracleValue.token.toLowerCase().indexOf(lowerFilter) > -1)
+            ) || []
     return (
         <main>
             <Search onSearch={(address) => router.push(address ? `/address/${address}` : '/')} />
@@ -120,33 +142,27 @@ function OraclePrices() {
     )
 }
 
-async function extracted(web3, cauldronAddress, decimals) {
-    const wethCauldron = new web3.eth.Contract(cauldronAbi, cauldronAddress)
-    const oracleAddress = await wethCauldron.methods.oracle().call();
-    const oracleData = await wethCauldron.methods.oracleData().call();
-    const oracleContract = new web3.eth.Contract(oracleAbi, oracleAddress)
-    return 1 / (await oracleContract.methods.get(oracleData).call())['1'] * Math.pow(10, decimals)
+async function getPriceForCauldron(web3, cauldron) {
+    const cauldronContract = new web3.eth.Contract(cauldronAbi, cauldron.address)
+    const oracle = await cauldronContract.methods.oracle().call()
+    const oracleData = await cauldronContract.methods.oracleData().call()
+    const oracleContract = new web3.eth.Contract(oracleAbi, oracle)
+    return 1 / (await oracleContract.methods.get(oracleData).call())['1'] * Math.pow(10, cauldron.decimals)
 }
 
-export async function getOraclePrices(Web3, cauldrons) {
+export async function getOraclePrices() {
     NProgress.start()
-    const mainnet = new Web3('wss://mainnet.infura.io/ws/v3/f6d830edcc1c44b38b066d4b1095194a')
-    const fantom = new Web3('wss://wsapi.fantom.network')
-    const avalanche = new Web3('https://api.avax.network/ext/bc/C/rpc')
-    const arbitrum = new Web3('https://arb1.arbitrum.io/rpc')
-    const bsc = new Web3('https://bsc-dataseed.binance.org')
+    const promises = Object.keys(CAULDRONS)
+        .map(network => CAULDRONS[network]
+            .map(async (cauldron) => ({
+                ...cauldron,
+                network: NETWORKS[network].name,
+                price: await getPriceForCauldron(NETWORKS[network].web3, cauldron)
+            }))
+        )
+        .reduce((acc, curr) => [...acc, ...curr], [])
 
-    const promises = [
-        ...cauldrons.mainnet.map(async (cauldron) => ({...cauldron, network: 'Ethereum', price: await extracted(mainnet, cauldron.address, cauldron.decimals)})),
-        ...cauldrons.ftm.map(async (cauldron) => ({...cauldron, network: 'Fantom', price: await extracted(fantom, cauldron.address, cauldron.decimals)})),
-        ...cauldrons.avax.map(async (cauldron) => ({...cauldron, network: 'Avalanche', price: await extracted(avalanche, cauldron.address, cauldron.decimals)})),
-        ...cauldrons.arbitrum.map(async (cauldron) => ({...cauldron, network: 'Arbitrum One', price: await extracted(arbitrum, cauldron.address, cauldron.decimals)})),
-        ...cauldrons.bsc.map(async (cauldron) => ({...cauldron, network: 'Binance Smart Chain', price: await extracted(bsc, cauldron.address, cauldron.decimals)}))
-    ]
-
-    const oracleValues = await Promise.all(promises)
+    const oraclePrices = await Promise.all(promises)
     NProgress.done()
-    return [...oracleValues];
+    return oraclePrices
 }
-
-export default OraclePrices
