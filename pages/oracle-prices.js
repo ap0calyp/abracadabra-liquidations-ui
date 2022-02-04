@@ -1,7 +1,6 @@
-import Search from '../components/search'
-import React from 'react'
-import OraclePrices from '../components/oraclePrices'
 import {useRouter} from 'next/router'
+import Search from '../components/search'
+import OraclePrices from '../components/oraclePrices'
 
 export default function OraclePricesPage() {
     const router = useRouter()

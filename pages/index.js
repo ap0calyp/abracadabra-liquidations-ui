@@ -1,5 +1,5 @@
-import Search from '../components/search'
 import {useRouter} from 'next/router'
+import Search from '../components/search'
 
 export default function Home() {
     const router = useRouter()

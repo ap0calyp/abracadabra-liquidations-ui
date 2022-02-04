@@ -1,5 +1,4 @@
 import {StringParam, useQueryParam} from 'use-query-params'
-import React from 'react'
 
 export default function Calculator() {
     const [collateralPrice, setCollateralPrice] = useQueryParam('collateral-price', StringParam)

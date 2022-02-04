@@ -76,6 +76,7 @@ export default function LiquidationTable(props) {
         [data])
 
     return <>
+        <h3 className={'center'}>Liquidations</h3>
         { error && <div>Error: {error}</div>}
         { liquidations && liquidations.length === 0 && <div className={'note'}>No liquidations found for {address}</div>}
         { liquidations && liquidations.length > 0 && <>

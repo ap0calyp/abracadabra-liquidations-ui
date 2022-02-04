@@ -1,7 +1,6 @@
-import Search from '../components/search'
 import {useRouter} from 'next/router'
+import Search from '../components/search'
 import Calculator from '../components/calculator'
-import React from 'react'
 
 export default function LiquidationCalculator() {
     const router = useRouter()
