@@ -74,6 +74,15 @@ function OraclePrices() {
         }
         return data;
     }, [data, error])
+    const cauldronsToShow = oracleValues && oracleValues.length > 0 &&
+        oracleValues
+            .filter(oracleValue => {
+                if (filter) {
+                    const lowerFilter = filter.toLowerCase()
+                    return oracleValue.network.toLowerCase().indexOf(lowerFilter) > -1 ||
+                        oracleValue.token.toLowerCase().indexOf(lowerFilter) > -1;
+                } else return true;
+            }) || [];
     return (
         <main>
             <Search onSearch={(address) => router.push(address ? `/address/${address}` : '/')} />
@@ -93,17 +102,7 @@ function OraclePrices() {
                 </Thead>
                 <Tbody>
                     {
-                        oracleValues && oracleValues.length > 0 &&
-                        oracleValues
-                            .filter(oracleValue => {
-                                if (filter) {
-                                    const lowerFilter = filter.toLowerCase()
-                                    return oracleValue.network.toLowerCase().indexOf(lowerFilter) > -1 ||
-                                        oracleValue.token.toLowerCase().indexOf(lowerFilter) > -1;
-                                } else return true;
-
-                            })
-                            .map(oracleValue =>
+                        cauldronsToShow.map(oracleValue =>
                                 <Tr key={oracleValue.address}>
                                     <Td>{oracleValue.network}</Td>
                                     <Td>{oracleValue.token}{oracleValue.deprecated && ' *'}</Td>
@@ -113,7 +112,9 @@ function OraclePrices() {
                     }
                 </Tbody>
             </Table>
-            <div className={"center"}>* Deprecated cauldron</div>
+            { cauldronsToShow.findIndex(cauldron => cauldron.deprecated === true) > -1 &&
+                <div className={"center"}>* Deprecated cauldron</div>
+            }
 
         </main>
     )
