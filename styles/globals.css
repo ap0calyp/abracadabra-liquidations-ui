@@ -104,6 +104,13 @@ input {
     margin-left: 5px;
 }
 
+.refresh-button {
+    border-radius: 10px;
+    background-color: transparent;
+    margin-right: 5px;
+    margin-left: 5px;
+}
+
 .calculator-box input::-webkit-outer-spin-button,
 .calculator-box input::-webkit-inner-spin-button {
     -webkit-appearance: none;

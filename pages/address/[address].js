@@ -16,7 +16,7 @@ export default function Address() {
                 <button className={"calculator-button"} disabled>Calculator 🧮</button>
                 <button className={"calculator-button"} onClick={() => router.push('/oracle-prices')}>Oracle Prices 🔮</button>
             </div>
-            <br/>
+            <h3 className={"center"}>Liquidations</h3>
             <LiquidationTable address={address} />
         </main>
     )
