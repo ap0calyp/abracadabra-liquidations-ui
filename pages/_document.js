@@ -8,10 +8,10 @@ export default class MyDocument extends Document {
 
     render() {
         return (
-            <Html lang={"en"}>
+            <Html lang={'en'}>
                 <Head>
-                    <meta name="description"
-                          content="Locate liquidation events from Abracadabra.money" />
+                    <meta name='description'
+                          content='Locate liquidation events from Abracadabra.money' />
                 </Head>
                 <body>
                 <Main />
