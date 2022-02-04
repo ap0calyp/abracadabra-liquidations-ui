@@ -1,7 +1,6 @@
-import React from 'react'
-import {useRouter} from 'next/router';
-import LiquidationTable from '../../components/liquidationTable';
-import Search from '../../components/search';
+import {useRouter} from 'next/router'
+import LiquidationTable from '../../components/liquidationTable'
+import Search from '../../components/search'
 
 export default function Address() {
     const router = useRouter()
@@ -13,10 +12,9 @@ export default function Address() {
         <main>
             <Search onSearch={(address) => router.push(address ? `/address/${address}` : '/')} initialAddress={address}/>
             <div className={'center'}>
-                <button className={"calculator-button"} disabled>Calculator 🧮</button>
-                <button className={"calculator-button"} onClick={() => router.push('/oracle-prices')}>Oracle Prices 🔮</button>
+                <button className={'calculator-button'} onClick={() => router.push('/liquidation-calculator')}>Calculator 🧮</button>
+                <button className={'calculator-button'} onClick={() => router.push('/oracle-prices')}>Oracle Prices 🔮</button>
             </div>
-            <h3 className={"center"}>Liquidations</h3>
             <LiquidationTable address={address} />
         </main>
     )

@@ -2,7 +2,7 @@ import useSWR from 'swr'
 import {createClient} from 'urql'
 import NProgress from 'nprogress'
 import React from 'react'
-import {useSnackbar} from 'notistack';
+import {useSnackbar} from 'notistack'
 import {Table, Thead, Tbody, Tr, Th, Td} from 'react-super-responsive-table'
 
 const chainResources = {
@@ -52,7 +52,7 @@ const headerColumns = [
     {
         header: 'Loan Repaid',
     }
-].map(column => <Th key={column.header}>{column.header}</Th>);
+].map(column => <Th key={column.header}>{column.header}</Th>)
 
 
 export default function LiquidationTable(props) {
@@ -71,13 +71,14 @@ export default function LiquidationTable(props) {
                 loanRepaid,
                 collateralRemoved,
                 collateralSymbol
-            };
+            }
         }),
         [data])
 
     return <>
+        <h3 className={'center'}>Liquidations</h3>
         { error && <div>Error: {error}</div>}
-        { liquidations && liquidations.length === 0 && <div className={"note"}>No liquidations found for {address}</div>}
+        { liquidations && liquidations.length === 0 && <div className={'note'}>No liquidations found for {address}</div>}
         { liquidations && liquidations.length > 0 && <>
             <Table>
                 <Thead><Tr>{ headerColumns }</Tr></Thead>
@@ -87,7 +88,7 @@ export default function LiquidationTable(props) {
                         return <Tr key={transaction}>
                             <Td>{chain}</Td>
                             <Td>{timestamp}</Td>
-                            <Td><a target="_blank" rel="noreferrer" href={explorer + transaction}>Block Explorer</a></Td>
+                            <Td><a target='_blank' rel='noreferrer' href={explorer + transaction}>Block Explorer</a></Td>
                             <Td>{exchangeRate} USD</Td>
                             <Td>{collateralRemoved} {collateralSymbol}</Td>
                             <Td>{loanRepaid} MIM</Td>
@@ -104,18 +105,18 @@ export async function getLiquidationsFromGraph(address, chainId, snackbar) {
     const clientOptions = {
         url: `https://api.thegraph.com/subgraphs/name/${subgraph}`
     }
-    const query = `query GetUserLiquidations($address: String!) { userLiquidations(where: {user : $address, timestamp_gt: 0}) {transaction exchangeRate timestamp loanRepaid collateralRemoved cauldron { collateralSymbol } }}`;
+    const query = `query GetUserLiquidations($address: String!) { userLiquidations(where: {user : $address, timestamp_gt: 0}) {transaction exchangeRate timestamp loanRepaid collateralRemoved cauldron { collateralSymbol } }}`
 
     const result = await createClient(clientOptions)
         .query(query, { address })
         .toPromise()
     if (result.error) {
-        snackbar.enqueueSnackbar(`Failed fetching data from [${subgraph}]`);
+        snackbar.enqueueSnackbar(`Failed fetching data from [${subgraph}]`)
         return []
     }
     return result.data.userLiquidations.map(liq => {
         const { transaction, exchangeRate, timestamp, loanRepaid, collateralRemoved, cauldron } = liq
-        const { collateralSymbol } = cauldron;
+        const { collateralSymbol } = cauldron
         return {
             transaction,
             exchangeRate,
@@ -145,12 +146,9 @@ export async function getEnsWallet(userAddress) {
 
 export async function getLiquidations(userAddress, snackbar) {
     NProgress.start()
-    let address;
-    if(userAddress.indexOf('.') > -1 ) {
-        address = (await getEnsWallet(userAddress)).toLowerCase()
-    } else {
-        address = userAddress.toLowerCase()
-    }
+    const address = (userAddress.indexOf('.') > -1 )
+        ? (await getEnsWallet(userAddress)).toLowerCase()
+        : userAddress.toLowerCase()
     if (!address.startsWith('0x') || address.length !== 42) {
         NProgress.done()
         return []

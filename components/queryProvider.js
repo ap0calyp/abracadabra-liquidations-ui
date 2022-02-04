@@ -1,5 +1,5 @@
-import {QueryParamProvider} from 'use-query-params';
-import {useRouter} from 'next/router';
+import {QueryParamProvider} from 'use-query-params'
+import {useRouter} from 'next/router'
 
 /**
  * Next.js query param provider.
