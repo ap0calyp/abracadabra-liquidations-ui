@@ -6,6 +6,7 @@ import {Table, Tr, Td, Th, Thead, Tbody} from 'react-super-responsive-table';
 import useSWR from 'swr';
 import React from 'react';
 import NProgress from 'nprogress';
+import {StringParam, useQueryParam} from 'use-query-params';
 
 const Web3 = require('web3')
 const cauldrons = {
@@ -64,6 +65,7 @@ const cauldrons = {
 }
 
 function OraclePrices() {
+    const [filter, setFilter] = useQueryParam('filter', StringParam)
     const router = useRouter()
     const { data, error, mutate } = useSWR([Web3, cauldrons], getOraclePrices, { revalidateOnFocus: false })
     const oracleValues = React.useMemo(() => {
@@ -80,6 +82,7 @@ function OraclePrices() {
                 <button className={"calculator-button"} disabled>Oracle Prices 🔮</button>
             </div>
             <h3 className={"center"}>Oracle Prices <button className={"refresh-button"} onClick={() => mutate()}>🔄</button></h3>
+            <input onChange={(e) => setFilter(e.target.value)} value={filter || ''} placeholder={"Filter by..."}/>
             <Table>
                 <Thead>
                    <Tr>
@@ -90,13 +93,23 @@ function OraclePrices() {
                 </Thead>
                 <Tbody>
                     {
-                        oracleValues && oracleValues.length > 0 && oracleValues.map(oracleValue =>
-                            <Tr key={oracleValue.address}>
-                                <Td>{oracleValue.network}</Td>
-                                <Td>{oracleValue.token}{oracleValue.deprecated && ' *'}</Td>
-                                <Td>{oracleValue.price} USD</Td>
-                            </Tr>
-                        )
+                        oracleValues && oracleValues.length > 0 &&
+                        oracleValues
+                            .filter(oracleValue => {
+                                if (filter) {
+                                    const lowerFilter = filter.toLowerCase()
+                                    return oracleValue.network.toLowerCase().indexOf(lowerFilter) > -1 ||
+                                        oracleValue.token.toLowerCase().indexOf(lowerFilter) > -1;
+                                } else return true;
+
+                            })
+                            .map(oracleValue =>
+                                <Tr key={oracleValue.address}>
+                                    <Td>{oracleValue.network}</Td>
+                                    <Td>{oracleValue.token}{oracleValue.deprecated && ' *'}</Td>
+                                    <Td>{oracleValue.price} USD</Td>
+                                </Tr>
+                            )
                     }
                 </Tbody>
             </Table>

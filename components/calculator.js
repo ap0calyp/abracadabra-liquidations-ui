@@ -13,17 +13,15 @@ export default function Calculator() {
     const positionHealth = mcr - (ltv * 100)
     return (
         <div className={'center'}>
-            <br/>
-            <br/>
             <div className={'calculator-box'}>
                 <label>Collateral Deposited</label>
-                <input className={'calculator-input'} value={collateralDeposited} onInput={(formEvent) => setCollateralDeposited(formEvent.target.value)} type={"number"} placeholder={'Number of Tokens'}/>
+                <input className={'calculator-input'} value={collateralDeposited || ''} onInput={(formEvent) => setCollateralDeposited(formEvent.target.value)} type={"number"} placeholder={'Number of Tokens'}/>
                 <label>Collateral Price</label>
-                <input className={'calculator-input'} value={collateralPrice} onInput={(formEvent) => setCollateralPrice(formEvent.target.value)} type={"number"} placeholder={'One Token in $'}/>
+                <input className={'calculator-input'} value={collateralPrice || ''} onInput={(formEvent) => setCollateralPrice(formEvent.target.value)} type={"number"} placeholder={'One Token in $'}/>
                 <label>MIM Borrowed</label>
-                <input className={'calculator-input'} value={mimBorrowed} onInput={(formEvent) => setMimBorrowed(formEvent.target.value)} type={"number"}/>
+                <input className={'calculator-input'} value={mimBorrowed || ''} onInput={(formEvent) => setMimBorrowed(formEvent.target.value)} type={"number"}/>
                 <label>MCR [Cauldron Parameter]</label>
-                <input className={'calculator-input'} value={mcr} onInput={(formEvent) => setMcr(formEvent.target.value)} type={"number"}/>
+                <input className={'calculator-input'} value={mcr || ''} onInput={(formEvent) => setMcr(formEvent.target.value)} type={"number"}/>
                 <label>LTV (Loan To Value)</label>
                 <input className={'calculator-input'} disabled value={ltvPercent || ''} placeholder={'Loan To Value'} style={solvent ? { color: '#ddd'} : { color: '#f00' } }/>
                 <label>Position Health</label>

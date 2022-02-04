@@ -8,8 +8,14 @@ export default function QueryProvider({ children }) {
     const router = useRouter()
 
     const history = {
-        push: ({ search }) => router.replace({ search, pathname: router.pathname }, undefined, { scroll: false, shallow: true }),
-        replace: ({ search }) => router.replace({ search, pathname: router.pathname }, undefined, { scroll: false, shallow: true })
+        push: ({ search }) => {
+            // console.log({search})
+            router.replace({ search, pathname: router.pathname }, undefined, { scroll: false, shallow: true })
+        },
+        replace: ({ search }) => {
+            // console.log({search})
+            router.replace({ search, pathname: router.pathname }, undefined, { scroll: false, shallow: true })
+        }
     }
 
     const location = {
