@@ -5,6 +5,7 @@ import oracleAbi from '../abis/oracle.json'
 import {Table, Tr, Td, Th, Thead, Tbody} from 'react-super-responsive-table';
 import useSWR from 'swr';
 import React from 'react';
+import NProgress from 'nprogress';
 
 const Web3 = require('web3')
 const cauldrons = {
@@ -64,7 +65,7 @@ const cauldrons = {
 
 function OraclePrices() {
     const router = useRouter()
-    const { data, error } = useSWR([Web3, cauldrons], getOraclePrices, { revalidateOnFocus: false })
+    const { data, error, mutate } = useSWR([Web3, cauldrons], getOraclePrices, { revalidateOnFocus: false })
     const oracleValues = React.useMemo(() => {
         if (!data || error) {
             return []
@@ -78,7 +79,7 @@ function OraclePrices() {
                 <button className={"calculator-button"} onClick={() => router.push('/liquidation-calculator')}>Calculator 🧮</button>
                 <button className={"calculator-button"} disabled>Oracle Prices 🔮</button>
             </div>
-            <h3 className={"center"}>Oracle Prices</h3>
+            <h3 className={"center"}>Oracle Prices <button className={"refresh-button"} onClick={() => mutate()}>🔄</button></h3>
             <Table>
                 <Thead>
                    <Tr>
@@ -114,6 +115,7 @@ async function extracted(web3, cauldronAddress, decimals) {
 }
 
 export async function getOraclePrices(Web3, cauldrons) {
+    NProgress.start()
     const mainnet = new Web3('wss://mainnet.infura.io/ws/v3/f6d830edcc1c44b38b066d4b1095194a')
     const fantom = new Web3('wss://wsapi.fantom.network')
     const avalanche = new Web3('https://api.avax.network/ext/bc/C/rpc')
@@ -129,6 +131,7 @@ export async function getOraclePrices(Web3, cauldrons) {
     ]
 
     const oracleValues = await Promise.all(promises)
+    NProgress.done()
     return [...oracleValues];
 }
 
