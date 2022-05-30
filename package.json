@@ -21,7 +21,7 @@
     "swr": "^1.1.2",
     "urql": "^2.0.6",
     "use-query-params": "^1.2.3",
-    "web3": "^1.7.0"
+    "web3": "^1.7.3"
   },
   "devDependencies": {
     "eslint": "7.32.0",
